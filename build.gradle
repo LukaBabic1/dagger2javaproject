@@ -2,19 +2,44 @@ group 'com.babic'
 version '1.0-SNAPSHOT'
 
 buildscript {
+
     repositories {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
     }
+
     dependencies {
-        classpath "net.ltgt.gradle:gradle-apt-plugin:0.4"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.13"
     }
 }
 
-apply plugin: 'net.ltgt.apt'
+apply plugin: 'net.ltgt.apt-idea'
 apply plugin: 'java'
-apply plugin: 'idea'
+
+idea {
+    project {
+        // experimental: whether annotation processing will be configured in the IDE; only actually used with the 'idea' task.
+        configureAnnotationProcessing = true
+    }
+
+    module {
+        apt {
+            // whether generated sources dirs are added as generated sources root
+            addGeneratedSourcesDirs = true
+
+            // whether the apt and testApt dependencies are added as module dependencies
+            addAptDependencies = true
+
+            // The following are mostly internal details; you shouldn't ever need to configure them.
+            // whether the compileOnly and testCompileOnly dependencies are added as module dependencies
+            addCompileOnlyDependencies = false // defaults to true in Gradle < 2.12
+
+            // the dependency scope used for apt and/or compileOnly dependencies (when enabled above)
+            mainDependenciesScope = "PROVIDED" // defaults to "COMPILE" in Gradle < 3.4, or when using the Gradle integration in IntelliJ IDEA
+        }
+    }
+}
 
 repositories {
     mavenCentral()
@@ -32,9 +57,8 @@ sourceSets {
 }
 
 dependencies {
-    apt 'com.google.dagger:dagger-compiler:2.0.1'
 
-//    compile files("build/classes/main")
+    apt 'com.google.dagger:dagger-compiler:2.0.1'
 
     compile 'com.google.dagger:dagger:2.0.1'
     compile 'com.google.code.gson:gson:2.5'
